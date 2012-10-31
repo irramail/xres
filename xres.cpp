@@ -175,7 +175,7 @@ class main_window : public window
     m_rd_SAVE->set_name("Save");
     m_rd_EXIT->set_name("Exit");
 
-    if (!fexists)
+    if (!fexists())
       m_rd_res6->hide();
 
   }
