@@ -31,6 +31,54 @@ bool fexists() {
   return f;
 }
 
+void xinverted() {
+  std::ifstream ifile;
+  std::ofstream ofsxorg;
+  std::vector<std::string> ixsessionrc;
+  std::string tmp, tmp2, inverted, normal;
+  bool f;
+  inverted = "DISPLAY=:0.0 xrandr -o inverted &";
+  normal = "DISPLAY=:0.0 xrandr -o normal &";
+
+  ifile.open(FNXSESSIONRC.c_str());
+  while(ifile.good()) {
+    std::getline(ifile, tmp);
+    if (tmp.length() && tmp != inverted)
+      ixsessionrc.push_back(tmp);
+    if (tmp == inverted)
+      f = true;
+  }
+  ifile.close();
+
+  if(ixsessionrc.empty())
+    ixsessionrc.push_back("#!/bin/sh");
+
+  if(!f) {
+    ixsessionrc.insert(ixsessionrc.begin() + 1, inverted);
+    tmp2 = inverted;
+  }
+  else
+    tmp2 = normal;
+
+  ofsxorg.open("/tmp/inverted.sh");
+  ofsxorg << "#!/bin/sh" << std::endl;
+  ofsxorg << tmp2 << std::endl;
+  ofsxorg.close();
+
+  pid_t child;
+
+  if (!(child = fork())) {
+    execlp("/bin/sh", "/bin/sh", "/tmp/inverted.sh", NULL);
+    exit(0);
+  }
+  wait(0);
+
+  ofsxorg.open(FNXSESSIONRC.c_str());
+  for(unsigned int i = 0; i < ixsessionrc.size(); i++)
+    ofsxorg << ixsessionrc[i] << std::endl;
+  ofsxorg.close();
+}
+
 void rmxorg() {
   std::ofstream ofsxorg;
   ofsxorg.open("/tmp/rm_xorg.sh");
@@ -125,6 +173,10 @@ void saveConfig() {
   }
   ifxsessionrc.close();
 
+  if(ixsessionrc.empty())
+    ixsessionrc.push_back("#!/bin/sh");
+  
+
   if (!(f1 && f2 && f3)) {
     ixsessionrc.insert(ixsessionrc.begin() + 1, str3); 
     ixsessionrc.insert(ixsessionrc.begin() + 1, str2); 
@@ -162,6 +214,7 @@ class main_window : public window
     m_rd_res4 = new hello_rd_button ( *this );
     m_rd_res5 = new hello_rd_button ( *this );
     m_rd_res6 = new hello_rd_button ( *this );
+    m_rd_res7 = new hello_rd_button ( *this );
 
     m_rd_SAVE = new hello_rd_button ( *this );
     m_rd_EXIT = new hello_rd_button ( *this );
@@ -171,22 +224,23 @@ class main_window : public window
     m_rd_res3->set_name("1368x768");
     m_rd_res4->set_name("1280x1024");
     m_rd_res5->set_name("1600x1200");
-    m_rd_res6->set_name("DEL xorg.conf");
+    m_rd_res6->set_name("Inverted/Un");
+    m_rd_res7->set_name("DEL xorg.conf & off");
     m_rd_SAVE->set_name("Save");
     m_rd_EXIT->set_name("Exit");
 
     if (!fexists())
-      m_rd_res6->hide();
+      m_rd_res7->hide();
 
   }
-  ~main_window(){ delete m_rd_res1, m_rd_res2, m_rd_res3, m_rd_res4, m_rd_res5, m_rd_res6, m_rd_SAVE, m_rd_EXIT; }
+  ~main_window(){ delete m_rd_res1, m_rd_res2, m_rd_res3, m_rd_res4, m_rd_res5, m_rd_res6, m_rd_res7, m_rd_SAVE, m_rd_EXIT; }
 
   void on_hello_click() { }
   void set_name(std::string name) { }
 
 private:
 
-  hello_rd_button *m_rd_res1, *m_rd_res2, *m_rd_res3, *m_rd_res4, *m_rd_res5, *m_rd_res6, *m_rd_SAVE, *m_rd_EXIT;
+  hello_rd_button *m_rd_res1, *m_rd_res2, *m_rd_res3, *m_rd_res4, *m_rd_res5, *m_rd_res6, *m_rd_res7, *m_rd_SAVE, *m_rd_EXIT;
 };
 
 
@@ -198,7 +252,7 @@ hello_rd_button::hello_rd_button ( main_window& w )
   : command_button ( w, rectangle(point(20, level_Y*35 + 20),125,30 ), "" ),
     m_parent ( w )
 { set_id(level_Y++); }
-void hello_rd_button::on_click() { if (get_id() == 7) exit(0); if (get_id() == 6) saveConfig(); if (get_id() < 5) res = get_name(); if (get_id() == 5) rmxorg(); }
+void hello_rd_button::on_click() { if (get_id() == 8) exit(0); if (get_id() == 7) saveConfig(); if (get_id() < 5) res = get_name(); if (get_id() == 5) xinverted(); if (get_id() == 6) rmxorg(); }
 
 main()
 {
