@@ -1,6 +1,6 @@
 //
 // xres.cpp
-//
+//Сделать выбор выход через grep xrandr
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -114,11 +114,13 @@ void saveConfig() {
   ifrm.close();
 
   ofrm.open(FNCONFIG.c_str());
-  
-  for (unsigned int i = 0; i < irm.size(); i++) {
+  for (unsigned int i = 0; i < irm.size(); i++)
     ofrm << irm[i] << std::endl;
-  }
   ofrm << "RES:" << res << std::endl;
+  ofrm.close();
+
+  ofrm.open("./task/REPORTED/res.pxml");
+  ofrm << "<RUNTIME>2011-10-18 19:00:00</RUNTIME><TEXT>Установлено новое разрешение: " << res << "</TEXT>" << std::endl;
   ofrm.close();
   
   if (res == "1368x768") {
