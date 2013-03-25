@@ -79,6 +79,34 @@ void xinverted() {
   ofsxorg.close();
 }
 
+void softinverted() {
+  std::ifstream ifile;
+  std::ofstream ofile;
+  std::vector<std::string> config;
+  std::string tmp, inverted;
+  bool f;
+  inverted = "ROTATE:YES";
+
+  ifile.open(FNCONFIG.c_str());
+  while(ifile.good()) {
+    std::getline(ifile, tmp);
+    if (tmp.length() && tmp != inverted)
+      config.push_back(tmp);
+    if (tmp == inverted)
+      f = true;
+  }
+  ifile.close();
+
+  if(!f)
+    config.push_back(inverted);
+
+  ofile.open(FNCONFIG.c_str());
+  for(unsigned int i = 0; i < config.size(); i++)
+    ofile << config[i] << std::endl;
+  ofile.close();
+
+}
+
 void rmxorg() {
   std::ofstream ofsxorg;
   ofsxorg.open("/tmp/rm_xorg.sh");
@@ -217,6 +245,7 @@ class main_window : public window
     m_rd_res5 = new hello_rd_button ( *this );
     m_rd_res6 = new hello_rd_button ( *this );
     m_rd_res7 = new hello_rd_button ( *this );
+    m_rd_res8 = new hello_rd_button ( *this );
 
     m_rd_SAVE = new hello_rd_button ( *this );
     m_rd_EXIT = new hello_rd_button ( *this );
@@ -228,6 +257,7 @@ class main_window : public window
     m_rd_res5->set_name("1600x1200");
     m_rd_res6->set_name("Inverted/Un");
     m_rd_res7->set_name("DEL xorg.conf & off");
+    m_rd_res8->set_name("Soft Inverted/Un");
     m_rd_SAVE->set_name("Save");
     m_rd_EXIT->set_name("Exit");
 
@@ -235,14 +265,14 @@ class main_window : public window
       m_rd_res7->hide();
 
   }
-  ~main_window(){ delete m_rd_res1, m_rd_res2, m_rd_res3, m_rd_res4, m_rd_res5, m_rd_res6, m_rd_res7, m_rd_SAVE, m_rd_EXIT; }
+  ~main_window(){ delete m_rd_res1, m_rd_res2, m_rd_res3, m_rd_res4, m_rd_res5, m_rd_res6, m_rd_res7, m_rd_res8, m_rd_SAVE, m_rd_EXIT; }
 
   void on_hello_click() { }
   void set_name(std::string name) { }
 
 private:
 
-  hello_rd_button *m_rd_res1, *m_rd_res2, *m_rd_res3, *m_rd_res4, *m_rd_res5, *m_rd_res6, *m_rd_res7, *m_rd_SAVE, *m_rd_EXIT;
+  hello_rd_button *m_rd_res1, *m_rd_res2, *m_rd_res3, *m_rd_res4, *m_rd_res5, *m_rd_res6, *m_rd_res7, *m_rd_res8, *m_rd_SAVE, *m_rd_EXIT;
 };
 
 
@@ -254,7 +284,7 @@ hello_rd_button::hello_rd_button ( main_window& w )
   : command_button ( w, rectangle(point(20, level_Y*35 + 20),125,30 ), "" ),
     m_parent ( w )
 { set_id(level_Y++); }
-void hello_rd_button::on_click() { if (get_id() == 8) exit(0); if (get_id() == 7) saveConfig(); if (get_id() < 5) res = get_name(); if (get_id() == 5) xinverted(); if (get_id() == 6) rmxorg(); }
+void hello_rd_button::on_click() { if (get_id() == 9) exit(0); if (get_id() == 8) saveConfig(); if (get_id() < 5) res = get_name(); if (get_id() == 5) xinverted(); if (get_id() == 6) rmxorg(); if (get_id() == 7) softinverted(); }
 
 main()
 {
